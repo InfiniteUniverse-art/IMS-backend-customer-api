@@ -3,15 +3,28 @@ import type { Request, Response, Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+// 1. Import your database initializer and routes
+// Note: In ESM mode, we use the .js extension for local imports
+import { initialize } from './config/db.js';
+import customerRoutes from './routes/customerRoutes.js';
+
 dotenv.config();
 
 const app: Application = express();
+const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
 app.use(cors()); 
 app.use(express.json());
 
-// --- Routes ---
+app.use((req, res, next) => {
+    console.log(`Incoming Request: ${req.method} ${req.url}`);
+    next();
+});
+
+// --- Register Routes ---
+// This mounts all routes from customerRoutes under the /api prefix
+app.use('/api', customerRoutes);
 
 // Root welcome
 app.get('/', (req: Request, res: Response) => {
@@ -26,8 +39,21 @@ app.get('/api/health', (req: Request, res: Response) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+// --- Server Startup Logic ---
+// We wrap this in an async function to await the DB connection
+async function startServer() {
+    try {
+        console.log('⏳ Connecting to Oracle Database...');
+        await initialize();
+        
+        app.listen(PORT, () => {
+            console.log(`🚀 Server ready at http://localhost:${PORT}`);
+        });
+    } catch (err) {
+        console.error('❌ Critical Error: Could not start server.');
+        console.error(err);
+        process.exit(1); // Stop the process if the DB fails
+    }
+}
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}`);
-});
+startServer();
