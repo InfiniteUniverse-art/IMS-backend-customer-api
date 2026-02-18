@@ -34,5 +34,4 @@ export async function close() {
   await oracledb.getPool().close(0);
 }
 
-// Export the base oracledb object to use getConnection() elsewhere
 export const db = oracledb;
