@@ -1,4 +1,5 @@
-import express, { Request, Response, Application } from 'express';
+import express from 'express';
+import type { Request, Response, Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -7,7 +8,7 @@ dotenv.config();
 const app: Application = express();
 
 // --- Middleware ---
-app.use(cors()); // Allows all origins by default. Use cors({ origin: 'http://your-app.com' }) for production.
+app.use(cors()); 
 app.use(express.json());
 
 // --- Routes ---

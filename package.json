@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --loader ts-node/esm src/app.ts",
+   "dev": "node --watch --experimental-strip-types src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js"
   },
@@ -27,6 +27,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.2.3",
     "@types/oracledb": "^6.10.1",
+    "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
