@@ -21,8 +21,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Customer Routes ---
-app.use('/api/v1', customerRoutes);
+// --- Register Routes ---
+// Mount customer routes under API version v1
+app.use('/api/v1/customers', customerRoutes);
+// app.use('/customers', customerRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Root welcome
