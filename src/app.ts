@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 import { initialize } from './config/db.js';
 import customerRoutes from './routes/customerRoutes.js';
+import path from 'path';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 
 // --- Customer Routes ---
 app.use('/api/v1', customerRoutes);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Root welcome
 app.get('/', (req: Request, res: Response) => {

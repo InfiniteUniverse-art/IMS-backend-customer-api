@@ -11,6 +11,12 @@ export const registerCustomer = async (req: Request, res: Response) => {
     try {
         const data = req.body;
 
+        // req.file is populated by the 'upload' middleware
+        if (req.file) {
+            // We store the relative path so the frontend can append the base URL
+            data.profile_image = `/uploads/profiles/${req.file.filename}`;
+        }
+
         const salt = await bcrypt.genSalt(10);
         data.password = await bcrypt.hash(data.password, salt);
         data.policy_id = Number(data.policy_id); 

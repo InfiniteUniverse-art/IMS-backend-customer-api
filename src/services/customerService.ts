@@ -5,8 +5,8 @@ export const createCustomer = async (data: any) => {
     try {
         connection = await db.getConnection();
         const sql = `
-            INSERT INTO CUSTOMERS (first_name, last_name, email, phone, gender, password, age, role, policy_id) 
-            VALUES (:first_name, :last_name, :email, :phone, :gender, :password, :age, :role, :policy_id)
+            INSERT INTO CUSTOMERS (first_name, last_name, email, phone, gender, password, age, role, policy_id, profile_image) 
+            VALUES (:first_name, :last_name, :email, :phone, :gender, :password, :age, :role, :policy_id, :profile_image)
         `;
         
         return await connection.execute(sql, data, { autoCommit: true });
