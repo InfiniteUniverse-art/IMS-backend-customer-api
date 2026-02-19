@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as customerService from '../services/customerService.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import logger from '../utils/logger.js';
 
 
@@ -111,5 +112,45 @@ export const getCustomerById = async (req: Request, res: Response): Promise<void
     } catch (error: any) {
         logger.error(`GetById Error: ${error?.message || error}`);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+// POST - Login
+export const loginCustomer = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        const user: any = await customerService.getCustomerByEmail(email);
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const hashed = (user.password || user.PASSWORD) as string;
+        const match = await bcrypt.compare(password, hashed || '');
+        if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const payload = {
+            id: user.id || user.ID,
+            email: user.email || user.EMAIL,
+            role: user.role || user.ROLE
+        };
+
+        const secret = process.env.JWT_SECRET as string;
+        const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+
+        const userInfo = {
+            id: payload.id,
+            email: payload.email,
+            role: payload.role,
+            first_name: user.first_name || user.FIRST_NAME,
+            last_name: user.last_name || user.LAST_NAME,
+            profile_image: user.profile_image || user.PROFILE_IMAGE
+        };
+
+        res.json({ token, user: userInfo });
+    } catch (err: any) {
+        logger.error(`Login Error: ${err.message}`);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };

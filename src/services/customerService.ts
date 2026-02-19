@@ -38,14 +38,27 @@ export const getAllCustomersFromDb = async () => {
     let connection;
     try {
         connection = await db.getConnection();
-        
-        const sql = `SELECT id, first_name, last_name, email, phone, gender, age, role, is_deleted, created_at FROM CUSTOMERS`;
-        
+        const sql = `SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE, GENDER, AGE, ROLE, IS_DELETED, CREATED_AT, PROFILE_IMAGE, POLICY_ID FROM CUSTOMERS`;
+
         const result = await connection.execute(sql, [], {
             outFormat: db.OUT_FORMAT_OBJECT
         });
 
-        return result.rows || [];
+        const rows: any[] = (result.rows as any) || [];
+        return rows.map((r: any) => ({
+            id: r.ID,
+            first_name: r.FIRST_NAME,
+            last_name: r.LAST_NAME,
+            email: r.EMAIL,
+            phone: r.PHONE,
+            gender: r.GENDER,
+            age: r.AGE,
+            role: r.ROLE,
+            is_deleted: r.IS_DELETED,
+            created_at: r.CREATED_AT,
+            profile_image: r.PROFILE_IMAGE,
+            policy_id: r.POLICY_ID
+        }));
     } catch (error) {
         console.error("Database Query Error:", error);
         throw error;
@@ -75,12 +88,50 @@ export const getCustomerByIdFromDb = async (id: number) => {
     let connection;
     try {
         connection = await db.getConnection();
-        const sql = `SELECT id, first_name, last_name, email, phone, gender, age, role, is_deleted, created_at FROM CUSTOMERS WHERE id = :id`;
+        const sql = `SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE, GENDER, AGE, ROLE, IS_DELETED, CREATED_AT, PROFILE_IMAGE, POLICY_ID FROM CUSTOMERS WHERE ID = :id`;
         const result = await connection.execute(sql, { id }, { outFormat: db.OUT_FORMAT_OBJECT });
-        return (result.rows && result.rows[0]) ? result.rows[0] : null;
+        const row: any = (result.rows && (result.rows as any[])[0]) ? (result.rows as any[])[0] : null;
+        if (!row) return null;
+        return {
+            id: row.ID,
+            first_name: row.FIRST_NAME,
+            last_name: row.LAST_NAME,
+            email: row.EMAIL,
+            phone: row.PHONE,
+            gender: row.GENDER,
+            age: row.AGE,
+            role: row.ROLE,
+            is_deleted: row.IS_DELETED,
+            created_at: row.CREATED_AT,
+            profile_image: row.PROFILE_IMAGE,
+            policy_id: row.POLICY_ID
+        };
     } catch (error) {
         console.error('Database Query Error (getCustomerById):', error);
         throw error;
+    } finally {
+        if (connection) await connection.close();
+    }
+};
+
+export const getCustomerByEmail = async (email: string) => {
+    let connection;
+    try {
+        connection = await db.getConnection();
+        const sql = `SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD, ROLE, PROFILE_IMAGE, POLICY_ID FROM CUSTOMERS WHERE EMAIL = :email AND IS_DELETED = 0`;
+        const result = await connection.execute(sql, { email }, { outFormat: db.OUT_FORMAT_OBJECT });
+        const row: any = (result.rows && (result.rows as any[])[0]) ? (result.rows as any[])[0] : null;
+        if (!row) return null;
+        return {
+            id: row.ID,
+            first_name: row.FIRST_NAME,
+            last_name: row.LAST_NAME,
+            email: row.EMAIL,
+            password: row.PASSWORD,
+            role: row.ROLE,
+            profile_image: row.PROFILE_IMAGE,
+            policy_id: row.POLICY_ID
+        };
     } finally {
         if (connection) await connection.close();
     }
