@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { registerTestUser } from '../controllers/customerController.js';
-
+import { registerCustomer, updateProfile  } from '../controllers/customerController.js';
+import { validateCustomerRegistration, validateCustomerUpdate } from '../middleware/validateCustomer.js';
 const router = Router();
 
-// Map POST /api/customers to the controller function
-router.post('/customers', registerTestUser);
+router.post('/create', validateCustomerRegistration, registerCustomer);
 router.get('/test', (req, res) => res.send("Route is working!"));
+router.patch('/customers/:id',validateCustomerUpdate, updateProfile);
+
 
 export default router;
