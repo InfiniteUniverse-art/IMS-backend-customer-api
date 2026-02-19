@@ -3,8 +3,6 @@ import type { Request, Response, Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// 1. Import your database initializer and routes
-// Note: In ESM mode, we use the .js extension for local imports
 import { initialize } from './config/db.js';
 import customerRoutes from './routes/customerRoutes.js';
 
@@ -33,7 +31,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Health Check
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/v1/health', (req: Request, res: Response) => {
     res.status(200).json({
         status: 'UP',
         timestamp: new Date().toISOString()
@@ -41,7 +39,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 // --- Server Startup Logic ---
-// We wrap this in an async function to await the DB connection
+
 async function startServer() {
     try {
         console.log('⏳ Connecting to Oracle Database...');
