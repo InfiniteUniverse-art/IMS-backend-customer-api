@@ -20,8 +20,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Customer Routes ---
-app.use('/api/v1', customerRoutes);
+// --- Register Routes ---
+// This mounts all routes from customerRoutes under the /api prefix
+app.use('/api/customers', customerRoutes);
+// app.use('/customers', customerRoutes);
 
 // Root welcome
 app.get('/', (req: Request, res: Response) => {
