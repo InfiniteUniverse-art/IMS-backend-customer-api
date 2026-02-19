@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 import { initialize } from './config/db.js';
 import customerRoutes from './routes/customerRoutes.js';
+import path from 'path';
 
 dotenv.config();
 
@@ -21,9 +22,10 @@ app.use((req, res, next) => {
 });
 
 // --- Register Routes ---
-// This mounts all routes from customerRoutes under the /api prefix
-app.use('/api/customers', customerRoutes);
+// Mount customer routes under API version v1
+app.use('/api/v1/customers', customerRoutes);
 // app.use('/customers', customerRoutes);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Root welcome
 app.get('/', (req: Request, res: Response) => {

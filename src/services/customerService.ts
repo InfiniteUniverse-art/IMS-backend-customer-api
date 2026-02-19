@@ -5,8 +5,8 @@ export const createCustomer = async (data: any) => {
     try {
         connection = await db.getConnection();
         const sql = `
-            INSERT INTO CUSTOMERS (first_name, last_name, email, phone, gender, password, age, role, policy_id) 
-            VALUES (:first_name, :last_name, :email, :phone, :gender, :password, :age, :role, :policy_id)
+            INSERT INTO CUSTOMERS (first_name, last_name, email, phone, gender, password, age, role, policy_id, profile_image) 
+            VALUES (:first_name, :last_name, :email, :phone, :gender, :password, :age, :role, :policy_id, :profile_image)
         `;
         
         return await connection.execute(sql, data, { autoCommit: true });
@@ -66,6 +66,21 @@ export const softDeleteCustomer = async (id: number) => {
 
         // rowsAffected will be 1 if the record existed and was active
         return result.rowsAffected === 1;
+    } finally {
+        if (connection) await connection.close();
+    }
+};
+
+export const getCustomerByIdFromDb = async (id: number) => {
+    let connection;
+    try {
+        connection = await db.getConnection();
+        const sql = `SELECT id, first_name, last_name, email, phone, gender, age, role, is_deleted, created_at FROM CUSTOMERS WHERE id = :id`;
+        const result = await connection.execute(sql, { id }, { outFormat: db.OUT_FORMAT_OBJECT });
+        return (result.rows && result.rows[0]) ? result.rows[0] : null;
+    } catch (error) {
+        console.error('Database Query Error (getCustomerById):', error);
+        throw error;
     } finally {
         if (connection) await connection.close();
     }

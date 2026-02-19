@@ -11,13 +11,24 @@ export const registerCustomer = async (req: Request, res: Response) => {
     try {
         const data = req.body;
 
+        if (req.file) {
+            // We store the relative path so the frontend can append the base URL
+            data.profile_image = `/uploads/profiles/${req.file.filename}`;
+        }
+
         const salt = await bcrypt.genSalt(10);
         data.password = await bcrypt.hash(data.password, salt);
-        data.policy_id = Number(data.policy_id); 
+        data.policy_id = isNaN(Number(data.policy_id)) ? null : Number(data.policy_id);
+        if (data.age) data.age = Number(data.age);
+    
         await customerService.createCustomer(data);
-        
         res.status(201).json({ message: "Registration successful" });
     } catch (err: any) {
+        // Log full error to help debugging (DB errors, missing tables, etc.)
+       logger.error(`Register Error: ${err.message}`);
+        if (err.message.includes('ORA-02290')) {
+            return res.status(400).json({ error: "Validation failed: Check role or age constraints." });
+        }
         if (err.message.includes('ORA-00001')) {
             return res.status(409).json({ error: "Email already exists" });
         }
@@ -77,5 +88,28 @@ export const deleteCustomer = async (req: Request, res: Response): Promise<void>
         }
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const getCustomerById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const id = parseInt(req.params.id as string);
+
+        if (isNaN(id)) {
+            res.status(400).json({ error: "Invalid ID format" });
+            return;
+        }
+
+        const customer = await customerService.getCustomerByIdFromDb(id);
+
+        if (!customer) {
+            res.status(404).json({ error: "Customer not found" });
+            return;
+        }
+
+        res.status(200).json(customer);
+    } catch (error: any) {
+        logger.error(`GetById Error: ${error?.message || error}`);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
