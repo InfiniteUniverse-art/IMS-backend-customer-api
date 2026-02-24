@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { registerCustomer, updateProfile, getAllCustomers, deleteCustomer, getCustomerById, loginCustomer } from '../controllers/customerController.js';
+import { registerCustomer, updateProfile, getAllCustomers, deleteCustomer, getCustomerById, loginCustomer, logoutCustomer } from '../controllers/customerController.js';
 import { validateCustomerRegistration, validateCustomerUpdate } from '../middleware/validateCustomer.js';
 import { upload } from '../middleware/upload.js';
 const router = Router();
@@ -10,8 +10,8 @@ router.get('/test', (req, res) => res.send("Route is working!"));
 // Login route
 router.post('/create', upload.single('image'), validateCustomerRegistration, registerCustomer);
 router.post('/login', loginCustomer);
+router.post('/logout', logoutCustomer);
 
-// Customer registration route with image upload and validation
 // Get all customers, delete a customer, and update a customer's profile
 router.get('/', getAllCustomers);
 // router.get('/:id', getCustomerById);

@@ -25,7 +25,6 @@ export const registerCustomer = async (req: Request, res: Response) => {
         await customerService.createCustomer(data);
         res.status(201).json({ message: "Registration successful" });
     } catch (err: any) {
-        // Log full error to help debugging (DB errors, missing tables, etc.)
        logger.error(`Register Error: ${err.message}`);
         if (err.message.includes('ORA-02290')) {
             return res.status(400).json({ error: "Validation failed: Check role or age constraints." });
@@ -41,7 +40,6 @@ export const updateProfile = async (req: Request, res: Response) => {
     try {
         const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
         const updates = req.body;
-
         delete updates.password;
         delete updates.email;
         delete updates.id;
@@ -139,6 +137,13 @@ export const loginCustomer = async (req: Request, res: Response) => {
         const secret = process.env.JWT_SECRET as string;
         const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 
+        res.cookie('jwt_token', token, {
+            httpOnly: true,     // Cannot be accessed by frontend JS (XSS Protection)
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'lax',   
+            maxAge: 3600000     // 1 hour in milliseconds
+        });
+
         const userInfo = {
             id: payload.id,
             email: payload.email,
@@ -148,9 +153,15 @@ export const loginCustomer = async (req: Request, res: Response) => {
             profile_image: user.profile_image || user.PROFILE_IMAGE
         };
 
-        res.json({ token, user: userInfo });
+        res.json({ user: userInfo });
     } catch (err: any) {
         logger.error(`Login Error: ${err.message}`);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+};
+
+// New Function: Logout
+export const logoutCustomer = async (req: Request, res: Response) => {
+    res.clearCookie('jwt_token'); // Deletes the cookie on the browser
+    res.status(200).json({ message: 'Logged out successfully' });
 };
